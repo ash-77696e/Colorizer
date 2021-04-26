@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+from basic_agent import *
 
 def main():
     # STORED AS BGR NOT RGB
@@ -11,16 +12,27 @@ def main():
     left = original_img[:, 0:int(original_img.shape[1] / 2), :]
     right = original_img[:, int(original_img.shape[1] / 2):original_img.shape[1], :]
     
-    left_bw = convert_to_grey(left)
-    right_bw = convert_to_grey(right)
+    # left_bw = convert_to_grey(left)
+    # right_bw = convert_to_grey(right)
     
+    # combined_img = []
+
+    # for i in range(0, len(left)):
+    #     combined_img.append(list(left[i]) + list(right[i]))
+    
+    # plt.imshow(combined_img)
+
+    # plt.show()
+
+    k_means_left, clusters = k_means(left)
+    recolored_left = recolor_left(left, k_means_left, clusters)
+
     combined_img = []
 
     for i in range(0, len(left)):
-        combined_img.append(list(left_bw[i]) + list(right[i]))
-    
-    plt.imshow(combined_img)
+        combined_img.append(list(recolored_left[i]) + list(right[i]))
 
+    plt.imshow(combined_img)
     plt.show()
 
 def convert_to_grey(img):
