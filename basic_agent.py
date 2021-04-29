@@ -114,10 +114,9 @@ def six_similar (patch, bw_left):
     result = []
     selected_patches = sample(all_patches, 1000)
     for i in range (len(selected_patches)):
-        for j in range(len(selected_patches)):
-            selected_patch, selected_indices = selected_patches[i]
-            difference = euclidean_distance(patch, selected_patch)
-            heapq.heappush(similar, (difference, selected_indices))
+        selected_patch, selected_indices = selected_patches[i]
+        difference = euclidean_distance(patch, selected_patch)
+        heapq.heappush(similar, (difference, selected_indices))
 
     for count in range(6):
         difference, training_indices = heapq.heappop(similar)
