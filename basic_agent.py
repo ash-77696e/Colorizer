@@ -108,17 +108,49 @@ def six_similar (patch, bw_left):
         for j in range(1, bw_left.shape[1] - 1):
             left_patch, left_indices = pixel_to_patch(bw_left, i, j)
             difference = euclidean_distance(patch, left_patch)
-            print(difference)
-            print('\n')
-            heapq.heappush(similar, (difference, (left_patch, left_indices)))
+            heapq.heappush(similar, (difference, left_indices))
 
     for count in range(6):
-        difference, pair = heapq.heappop(similar)
-        training_patch, training_indices = pair
-        result.append((training_patch, training_indices))
+        difference, training_indices = heapq.heappop(similar)
+        result.append(training_indices)
     return result # list of 6 most similar patches
 
-def choose_pixel_color (training_patches, clusters, recolored_left):
+def choose_pixel_color (training_indices, clusters, k_means_left):
+    count_list = []
+    for i in range (len(clusters)):
+        count_list.append(0)
+
+    for i in range(6):
+        training_index = training_indices[i]
+        index = training_index[4] # to get information about middle pixel in the patch
+        x, y = index
+        cluster = k_means_left[x][y].clusterNum
+        count_list[cluster] += 1
+
+    maxCount = 0
+    maxIndex = -1
+
+    for i in range(len(count_list)):
+        if count_list[i] > maxCount:
+            maxCount = count_list[i]
+            maxIndex = i
+    hasTie = False
+    for i in range(len(count_list)):
+        if i != maxIndex:
+            if maxCount == count_list[i]:
+                hasTie = True
+                break
+    
+    if(not hasTie):
+        return clusters[maxIndex]
+    else: # if there is a tie pick the representative color of the middle pixel of the most similar patch
+        training_index = training_indices[0]
+        index = training_index[4] # to get information about middle pixel in the patch
+        x, y = index
+        cluster = k_means_left[x][y].clusterNum
+        return clusters[cluster]
+
+    '''
     dictionary = {} # holds cluster rgb value as the key, count of how many patches have middle pixels represented by the color
     # initalize counts for each representative color as 0
     for i in range (5):
@@ -126,8 +158,8 @@ def choose_pixel_color (training_patches, clusters, recolored_left):
     
     # go through training patches
     for i in range (6):
-        training_patch, training_indices = training_patches[i]
-        index = training_indices[4] # to get information about middle pixel in the patch
+        training_index = training_indices[i]
+        index = training_index[4] # to get information about middle pixel in the patch
         x, y = index
         cluster = recolored_left[x][y].clusterNum
         dictionary[clusters[cluster]] += 1
@@ -149,13 +181,15 @@ def choose_pixel_color (training_patches, clusters, recolored_left):
     if(not hasTie):
         return clusters[maxIndex]
     else: # if there is a tie pick the representative color of the middle pixel of the most similar patch
-        training_patch, training_indices = training_patches[0]
-        index = training_indices[4] # to get information about middle pixel in the patch
+        training_index = training_indices[0]
+        index = training_index[4] # to get information about middle pixel in the patch
         x, y = index
         cluster = recolored_left[x][y].clusterNum
         return clusters[cluster]
+    '''
 
-def recolor_right(bw_left, bw_right, recolored_left, clusters):
+
+def recolor_right(bw_left, bw_right, k_means_left, clusters):
     recolored_right = np.copy(bw_right)
     for i in range (bw_right.shape[0]):
         for j in range(bw_right.shape[1]):
@@ -166,8 +200,8 @@ def recolor_right(bw_left, bw_right, recolored_left, clusters):
                 continue
             # get the patch of nine pixels with the current pixel as the middle
             curr_patch, pixel_indices = pixel_to_patch(bw_right, i, j) 
-            training_patches = six_similar(curr_patch, bw_left)
-            color = choose_pixel_color(training_patches, clusters, recolored_left)
+            training_indices = six_similar(curr_patch, bw_left)
+            color = choose_pixel_color(training_indices, clusters, k_means_left)
             recolored_right[i][j] = color
     
     return recolored_right

@@ -26,7 +26,7 @@ def main():
 
     k_means_left, clusters = k_means(left)
     recolored_left = recolor_left(left, k_means_left, clusters)
-    recolored_right = recolor_right(left_bw, right_bw, recolored_left, clusters)
+    recolored_right = recolor_right(left_bw, right_bw, k_means_left, clusters)
 
     combined_img = []
 
