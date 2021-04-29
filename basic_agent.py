@@ -103,16 +103,20 @@ def pixel_to_patch(arr, i, j): # find a 3x3 patch given indices of an array
 
 def get_patch_list (bw_left):
     result = []
-    for i in range (1, bw_left.shape[0] - 1):
-        for j in range(1, bw_left.shape[1] - 1):
+    used = []
+    while(len(result) < 1000):
+        i = randint(1, bw_left.shape[0] - 2)
+        j = randint(1, bw_left.shape[1] - 2)
+        if ((i, j) not in used):
             result.append(pixel_to_patch(bw_left, i, j))
+            used.append((i, j))
     return result
+    
 
 def six_similar (patch, bw_left):
-    all_patches = get_patch_list(bw_left)
     similar = []
     result = []
-    selected_patches = sample(all_patches, 1000)
+    selected_patches = get_patch_list(bw_left)
     for i in range (len(selected_patches)):
         selected_patch, selected_indices = selected_patches[i]
         difference = euclidean_distance(patch, selected_patch)
@@ -198,6 +202,7 @@ def choose_pixel_color (training_indices, clusters, k_means_left):
 
 
 def recolor_right(bw_left, bw_right, k_means_left, clusters):
+    recolored_count = 0
     recolored_right = np.copy(bw_right)
     for i in range (bw_right.shape[0]):
         for j in range(bw_right.shape[1]):
@@ -211,5 +216,6 @@ def recolor_right(bw_left, bw_right, k_means_left, clusters):
             training_indices = six_similar(curr_patch, bw_left)
             color = choose_pixel_color(training_indices, clusters, k_means_left)
             recolored_right[i][j] = color
-    
+            recolored_count += 1
+            print(recolored_count)
     return recolored_right
