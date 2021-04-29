@@ -12,8 +12,8 @@ def main():
     left = original_img[:, 0:int(original_img.shape[1] / 2), :]
     right = original_img[:, int(original_img.shape[1] / 2):original_img.shape[1], :]
     
-    # left_bw = convert_to_grey(left)
-    # right_bw = convert_to_grey(right)
+    left_bw = convert_to_grey(left)
+    right_bw = convert_to_grey(right)
     
     # combined_img = []
 
@@ -26,11 +26,12 @@ def main():
 
     k_means_left, clusters = k_means(left)
     recolored_left = recolor_left(left, k_means_left, clusters)
+    recolored_right = recolor_right(left_bw, right_bw, recolored_left, clusters)
 
     combined_img = []
 
     for i in range(0, len(left)):
-        combined_img.append(list(recolored_left[i]) + list(right[i]))
+        combined_img.append(list(recolored_left[i]) + list(recolored_right[i]))
 
     plt.imshow(combined_img)
     plt.show()

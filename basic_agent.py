@@ -151,8 +151,8 @@ def choose_pixel_color (training_patches, clusters, recolored_left):
         cluster = recolored_left[x][y].clusterNum
         return clusters[cluster]
 
-def recolor_right(bw_left, bw_right, recolored_left, right, clusters):
-    recolored_right = np.copy(right)
+def recolor_right(bw_left, bw_right, recolored_left, clusters):
+    recolored_right = np.copy(bw_right)
     for i in range (bw_right.shape[0]):
         for j in range(bw_right.shape[1]):
             if i == 0 or j == 0 or i == bw_right.shape[0] - 1 or j == bw_right.shape[1] - 1: # border cell to recolor black
