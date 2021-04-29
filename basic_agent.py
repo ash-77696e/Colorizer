@@ -88,30 +88,34 @@ def recolor_left(left, k_means_left, clusters):
     return recolored_left
 
 def pixel_to_patch(arr, i, j): # find a 3x3 patch given indices of an array
-    patch = np.empty((3, 3)) 
+    pixel_indices = []
+    patch = np.empty((3, 3, 3)) 
     patchX = 0
     patchY = 0
     for x in range (i - 1, i + 2):
         patchY = 0
         for y in range (j - 1, j + 2):
-            patch[patchX][patchY] = (arr[x][y], (x, y)) 
+            patch[patchX][patchY] = arr[x][y]
+            pixel_indices.append((x,y)) 
             patchY += 1
         patchX += 1
-    return patch.flatten() # patch stores gray value and the index of the pixel
+    return patch.flatten(), pixel_indices  # patch stores gray value and the index of the pixel
 
 def six_similar (patch, bw_left):
     similar = []
     result = []
     for i in range (1, bw_left.shape[0] - 1):
         for j in range(1, bw_left.shape[1] - 1):
-            left_patch = pixel_to_patch(bw_left, i, j)
-            patch_val, patch_index = patch
-            left_patch_val, left_patch_index = left_patch
-            difference = euclidean_distance(patch_val, left_patch_val)
-            heapq.heappush(similar, (difference, left_patch))
+            left_patch, left_indices = pixel_to_patch(bw_left, i, j)
+            difference = euclidean_distance(patch, left_patch)
+            print(difference)
+            print('\n')
+            heapq.heappush(similar, (difference, (left_patch, left_indices)))
 
     for count in range(6):
-        result.append(heapq.heappop(similar))
+        difference, pair = heapq.heappop(similar)
+        training_patch, training_indices = pair
+        result.append((training_patch, training_indices))
     return result # list of 6 most similar patches
 
 def choose_pixel_color (training_patches, clusters, recolored_left):
@@ -122,8 +126,8 @@ def choose_pixel_color (training_patches, clusters, recolored_left):
     
     # go through training patches
     for i in range (6):
-        difference, training_patch = training_patches[i]
-        grayVal, index = training_patch[4] # to get information about middle pixel in the patch
+        training_patch, training_indices = training_patches[i]
+        index = training_indices[4] # to get information about middle pixel in the patch
         x, y = index
         cluster = recolored_left[x][y].clusterNum
         dictionary[clusters[cluster]] += 1
@@ -145,8 +149,8 @@ def choose_pixel_color (training_patches, clusters, recolored_left):
     if(not hasTie):
         return clusters[maxIndex]
     else: # if there is a tie pick the representative color of the middle pixel of the most similar patch
-        difference, training_patch = training_patches[0]
-        grayVal, index = training_patch[4] # to get information about middle pixel in the patch
+        training_patch, training_indices = training_patches[0]
+        index = training_indices[4] # to get information about middle pixel in the patch
         x, y = index
         cluster = recolored_left[x][y].clusterNum
         return clusters[cluster]
@@ -161,7 +165,7 @@ def recolor_right(bw_left, bw_right, recolored_left, clusters):
                 recolored_right[i][j][2] = 0
                 continue
             # get the patch of nine pixels with the current pixel as the middle
-            curr_patch = pixel_to_patch(bw_right, i, j) 
+            curr_patch, pixel_indices = pixel_to_patch(bw_right, i, j) 
             training_patches = six_similar(curr_patch, bw_left)
             color = choose_pixel_color(training_patches, clusters, recolored_left)
             recolored_right[i][j] = color
