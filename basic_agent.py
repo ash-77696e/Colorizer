@@ -1,5 +1,6 @@
 import numpy as np
 from random import *
+import heapq
 
 class Point:
     def __init__(self, rgb, clusterNum):
@@ -85,3 +86,84 @@ def recolor_left(left, k_means_left, clusters):
             recolored_left[i][j] = clusters[cluster]
     
     return recolored_left
+
+def pixel_to_patch(arr, i, j): # find a 3x3 patch given indices of an array
+    patch = np.empty((3, 3)) 
+    patchX = 0
+    patchY = 0
+    for x in range (i - 1, i + 2):
+        patchY = 0
+        for y in range (j - 1, j + 2):
+            patch[patchX][patchY] = (arr[x][y], (x, y)) 
+            patchY += 1
+        patchX += 1
+    return patch.flatten() # patch stores gray value and the index of the pixel
+
+def six_similar (patch, bw_left):
+    similar = []
+    result = []
+    for i in range (1, bw_left.shape[0] - 1):
+        for j in range(1, bw_left.shape[1] - 1):
+            left_patch = pixel_to_patch(bw_left, i, j)
+            patch_val, patch_index = patch
+            left_patch_val, left_patch_index = left_patch
+            difference = euclidean_distance(patch_val, left_patch_val)
+            heapq.heappush(similar, (difference, left_patch))
+
+    for count in range(6):
+        result.append(heapq.heappop(similar))
+    return result # list of 6 most similar patches
+
+def choose_pixel_color (training_patches, clusters, recolored_left):
+    dictionary = {} # holds cluster rgb value as the key, count of how many patches have middle pixels represented by the color
+    # initalize counts for each representative color as 0
+    for i in range (5):
+        dictionary[clusters[i]] = 0
+    
+    # go through training patches
+    for i in range (6):
+        difference, training_patch = training_patches[i]
+        grayVal, index = training_patch[4] # to get information about middle pixel in the patch
+        x, y = index
+        cluster = recolored_left[x][y].clusterNum
+        dictionary[clusters[cluster]] += 1
+
+    maxCount = 0
+    maxIndex = -1
+
+    for i in range(5):
+        if dictionary[clusters[i]] > maxCount:
+            maxCount = dictionary[clusters[i]]
+            maxIndex = i
+    hasTie = False
+    for i in range(5):
+        if i != maxIndex:
+            if maxCount == dictionary[clusters[i]]:
+                hasTie = True
+                break
+    
+    if(not hasTie):
+        return clusters[maxIndex]
+    else: # if there is a tie pick the representative color of the middle pixel of the most similar patch
+        difference, training_patch = training_patches[0]
+        grayVal, index = training_patch[4] # to get information about middle pixel in the patch
+        x, y = index
+        cluster = recolored_left[x][y].clusterNum
+        return clusters[cluster]
+
+def recolor_right(bw_left, bw_right, recolored_left, right, clusters):
+    recolored_right = np.copy(right)
+    for i in range (bw_right.shape[0]):
+        for j in range(bw_right.shape[1]):
+            if i == 0 or j == 0 or i == bw_right.shape[0] - 1 or j == bw_right.shape[1] - 1: # border cell to recolor black
+                recolored_right[i][j][0] = 0
+                recolored_right[i][j][1] = 0
+                recolored_right[i][j][2] = 0
+                continue
+            # get the patch of nine pixels with the current pixel as the middle
+            curr_patch = pixel_to_patch(bw_right, i, j) 
+            training_patches = six_similar(curr_patch, bw_left)
+            color = choose_pixel_color(training_patches, clusters, recolored_left)
+            recolored_right[i][j] = color
+    
+    return recolored_right
