@@ -101,14 +101,23 @@ def pixel_to_patch(arr, i, j): # find a 3x3 patch given indices of an array
         patchX += 1
     return patch.flatten(), pixel_indices  # patch stores gray value and the index of the pixel
 
-def six_similar (patch, bw_left):
-    similar = []
+def get_patch_list (bw_left):
     result = []
     for i in range (1, bw_left.shape[0] - 1):
         for j in range(1, bw_left.shape[1] - 1):
-            left_patch, left_indices = pixel_to_patch(bw_left, i, j)
-            difference = euclidean_distance(patch, left_patch)
-            heapq.heappush(similar, (difference, left_indices))
+            result.append(pixel_to_patch(bw_left, i, j))
+    return result
+
+def six_similar (patch, bw_left):
+    all_patches = get_patch_list(bw_left)
+    similar = []
+    result = []
+    selected_patches = sample(all_patches, 1000)
+    for i in range (len(selected_patches)):
+        for j in range(len(selected_patches)):
+            selected_patch, selected_indices = selected_patches[i]
+            difference = euclidean_distance(patch, selected_patch)
+            heapq.heappush(similar, (difference, selected_indices))
 
     for count in range(6):
         difference, training_indices = heapq.heappop(similar)
