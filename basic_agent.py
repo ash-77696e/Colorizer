@@ -89,13 +89,13 @@ def recolor_left(left, k_means_left, clusters):
 
 def pixel_to_patch(arr, i, j): # find a 3x3 patch given indices of an array
     pixel_indices = []
-    patch = np.empty((3, 3, 3)) 
+    patch = np.empty((3, 3)) 
     patchX = 0
     patchY = 0
     for x in range (i - 1, i + 2):
         patchY = 0
         for y in range (j - 1, j + 2):
-            patch[patchX][patchY] = arr[x][y]
+            patch[patchX][patchY] = arr[x][y][0]
             pixel_indices.append((x,y)) 
             patchY += 1
         patchX += 1
