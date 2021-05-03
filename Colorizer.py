@@ -2,6 +2,7 @@ from cv2 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 from basic_agent import *
+import advanced_agent
 
 def main():
     # STORED AS BGR NOT RGB
@@ -15,14 +16,14 @@ def main():
     left_bw = convert_to_grey(left)
     right_bw = convert_to_grey(right)
     
-    # combined_img = []
+    # # combined_img = []
 
-    # for i in range(0, len(left)):
-    #     combined_img.append(list(left[i]) + list(right[i]))
+    # # for i in range(0, len(left)):
+    # #     combined_img.append(list(left[i]) + list(right[i]))
     
-    # plt.imshow(combined_img)
+    # # plt.imshow(combined_img)
 
-    # plt.show()
+    # # plt.show()
 
     k_means_left, clusters = k_means(left)
     recolored_left = recolor_left(left, k_means_left, clusters)
@@ -35,6 +36,10 @@ def main():
 
     plt.imshow(combined_img)
     plt.show()
+
+    # input = np.array([25, 33, 22, 34, 22, 112, 22]) / 255
+    # print(input)
+    # print(advanced_agent.sigmoid(input) * 255)
 
 def convert_to_grey(img):
     bw = np.copy(img)
