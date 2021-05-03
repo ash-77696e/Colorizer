@@ -6,7 +6,7 @@ import advanced_agent
 
 def main():
     # STORED AS BGR NOT RGB
-    original_img = cv2.imread('image.jpg')
+    original_img = cv2.imread('edp.jpg')
     original_img = cv2.cvtColor(original_img, cv2.COLOR_BGR2RGB)
     #print(original_img)
 
@@ -15,15 +15,18 @@ def main():
     
     left_bw = convert_to_grey(left)
     right_bw = convert_to_grey(right)
-    
-    # # combined_img = []
 
-    # # for i in range(0, len(left)):
-    # #     combined_img.append(list(left[i]) + list(right[i]))
+    red_ws, green_ws, blue_ws = advanced_agent.train(left_bw, left)
+    right_recolored = advanced_agent.test(red_ws, green_ws, blue_ws, right_bw)
     
-    # # plt.imshow(combined_img)
+    combined_img = []
 
-    # # plt.show()
+    for i in range(0, len(left)):
+        combined_img.append(list(left[i]) + list(right_recolored[i]))
+    
+    plt.imshow(combined_img)
+
+    plt.show()
 
     # k_means_left, clusters = k_means(left)
     # recolored_left = recolor_left(left, k_means_left, clusters)
@@ -40,8 +43,6 @@ def main():
     # input = np.array([25, 33, 22, 34, 22, 112, 22]) / 255
     # print(input)
     # print(advanced_agent.sigmoid(input) * 255)
-
-    advanced_agent.train(left_bw, left)
     
 
 def convert_to_grey(img):
