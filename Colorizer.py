@@ -42,6 +42,7 @@ def main():
     # print(advanced_agent.sigmoid(input) * 255)
 
     advanced_agent.train(left_bw, left)
+    
 
 def convert_to_grey(img):
     bw = np.copy(img)
