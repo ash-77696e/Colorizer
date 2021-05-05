@@ -27,7 +27,7 @@ def main():
     plt.imshow(combined_img)
 
     plt.show()
-
+    print(average_euclidean(right_recolored, right, right_bw))
     # k_means_left, clusters = k_means(left)
     # recolored_left = recolor_left(left, k_means_left, clusters)
     # recolored_right = recolor_right(left_bw, right_bw, k_means_left, clusters)

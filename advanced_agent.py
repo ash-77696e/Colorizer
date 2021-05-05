@@ -31,7 +31,7 @@ def get_all_pixels(img):
 def loss(xs, ws, actual_list):
     sum = 0
     for i in range(xs.shape[0]):
-        predicted = sigmoid(np.dot(xs[i], np.transpose(ws)))
+        predicted = 255*sigmoid(np.dot(xs[i], np.transpose(ws)))
         actual = actual_list[i]
         sum += (predicted - actual) ** 2
     return sum
@@ -100,13 +100,15 @@ def train(left_bw_img, left_colored_img):
     green_ws = np.empty((1, 10), dtype=float)
     
     for i in range(red_ws.shape[1]):
-        red_ws[0][i] = 0.15
-        blue_ws[0][i] = 0.15
-        green_ws[0][i] = 0.15
+        red_ws[0][i] = 0.0005
+        blue_ws[0][i] = 0.0005
+        green_ws[0][i] = 0.0005
 
-    red_ws = sgd(xs, red_ws, red_pixels, 0.000000000000000001)
-    blue_ws = sgd(xs, blue_ws, blue_pixels, 0.000000000000000001)
-    green_ws = sgd(xs, green_ws, green_pixels, 0.000000000000000001)
+    alpha = 0.00005
+
+    red_ws = sgd(xs, red_ws, red_pixels, alpha)
+    blue_ws = sgd(xs, blue_ws, blue_pixels, alpha)
+    green_ws = sgd(xs, green_ws, green_pixels, alpha)
 
     return red_ws, green_ws, blue_ws
 
