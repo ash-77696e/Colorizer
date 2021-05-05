@@ -2,12 +2,26 @@ import numpy as np
 import basic_agent
 from random import *
 
+'''
+This is the advanced agent class which has functions necessary for the advanced agent's implementation
+Authors: Ashwin Haridas, Ritin Nair
+'''
+
+'''
+This function applies the sigmoid function to a given value(s)
+'''
 def sigmoid(z):
     return 1 / (1 + np.exp(-z))
 
+'''
+This function preprocesses a given value(s)
+'''
 def preprocess(x):
     return x / 255
 
+'''
+This function returns a list of all patches in an image
+'''
 def get_all_patches(img):
     result = []
     for i in range(1, img.shape[0] - 1):
@@ -16,6 +30,9 @@ def get_all_patches(img):
     
     return result
 
+'''
+This function returns a list of all pixels in an image
+'''
 def get_all_pixels(img):
     red = []
     green = []
@@ -28,6 +45,9 @@ def get_all_pixels(img):
     
     return red, green, blue
 
+'''
+This function determines the loss of our model
+'''
 def loss(xs, ws, actual_list):
     sum = 0
     for i in range(xs.shape[0]):
@@ -36,6 +56,9 @@ def loss(xs, ws, actual_list):
         sum += (predicted - actual) ** 2
     return sum
 
+'''
+This function runs stocastic gradient descent to train our model
+'''
 def sgd(xs, ws, actual_list, alpha):
     count = 0
     initial_ws = np.copy(ws)
@@ -43,16 +66,19 @@ def sgd(xs, ws, actual_list, alpha):
         i = randint(0, xs.shape[0] - 1)
         actual_val = actual_list[i]
         old_ws = np.copy(ws)
-        predicted = 255* sigmoid(np.dot(xs[i], np.transpose(old_ws)))
+        predicted = 255* sigmoid(np.dot(xs[i], np.transpose(old_ws))) # get predicted
         # print(loss(xs, ws, actual_list))
         for j in range(ws.shape[1]):
-            ws[0][j] = old_ws[0][j] - alpha * (2 * (predicted - actual_val) * predicted * (1 - predicted/255) * xs[i][j])
+            ws[0][j] = old_ws[0][j] - alpha * (2 * (predicted - actual_val) * predicted * (1 - predicted/255) * xs[i][j]) # update equation
         count += 1
 
         if count == 10000:
             break
     return ws
 
+'''
+This function recolors the right side
+'''
 def test(red_ws, green_ws, blue_ws, bw_right):
     recolored_right = np.copy(bw_right)
     for i in range (bw_right.shape[0]):
@@ -70,7 +96,7 @@ def test(red_ws, green_ws, blue_ws, bw_right):
                 else:
                     patch[0][k] = curr_patch[k - 1] / 255
             
-            red = 255*sigmoid(np.dot(patch, np.transpose(red_ws)))
+            red = 255*sigmoid(np.dot(patch, np.transpose(red_ws))) # apply model with appropriate weights
             green = 255*sigmoid(np.dot(patch, np.transpose(green_ws)))
             blue = 255*sigmoid(np.dot(patch, np.transpose(blue_ws)))
             
@@ -81,7 +107,10 @@ def test(red_ws, green_ws, blue_ws, bw_right):
             
 
     return recolored_right
-    
+
+'''
+This function sets up the model to train
+'''    
 def train(left_bw_img, left_colored_img):
     patches = get_all_patches(left_bw_img)
     red_pixels, green_pixels, blue_pixels = get_all_pixels(left_colored_img)
@@ -111,7 +140,3 @@ def train(left_bw_img, left_colored_img):
     green_ws = sgd(xs, green_ws, green_pixels, alpha)
 
     return red_ws, green_ws, blue_ws
-
-if __name__ == '__main__':
-    actual = np.array([1, 2, 3], dtype=float)
-    print(preprocess(actual))
