@@ -6,7 +6,7 @@ import advanced_agent
 
 def main():
     # STORED AS BGR NOT RGB
-    original_img = cv2.imread('edp.jpg')
+    original_img = cv2.imread('original.jpg')
     original_img = cv2.cvtColor(original_img, cv2.COLOR_BGR2RGB)
     #print(original_img)
 
@@ -36,6 +36,8 @@ def main():
 
     # for i in range(0, len(left)):
     #     combined_img.append(list(recolored_left[i]) + list(recolored_right[i]))
+    
+    # print(average_euclidean(recolored_right, right, right_bw))
 
     # plt.imshow(combined_img)
     # plt.show()
@@ -52,6 +54,18 @@ def convert_to_grey(img):
             bw[i][j] = 0.21 * bw[i][j][0] + 0.72 * bw[i][j][1] + 0.07 * bw[i][j][2]
     
     return bw
+
+def average_euclidean(recolored_right, right, bw_right):
+    sum = 0
+    count = 0
+    for i in range (bw_right[0].shape[0]):
+        for j in range(bw_right[0].shape[1]):
+            if i == 0 or j == 0 or i == bw_right.shape[0] - 1 or j == bw_right.shape[1] - 1: # border cell to recolor black
+                continue
+            sum += euclidean_distance(recolored_right[i][j], right[i][j])
+            count += 1
+
+    return sum / count
 
 
 if __name__ == '__main__':
